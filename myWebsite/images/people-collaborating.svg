@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a172b"/>
+      <stop offset="100%" stop-color="#1e2c4d"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" rx="40" fill="url(#bg)"/>
+  <circle cx="250" cy="180" r="90" fill="#334155"/>
+  <circle cx="650" cy="190" r="90" fill="#334155"/>
+  <rect x="180" y="260" width="140" height="240" rx="30" fill="#0f172a"/>
+  <rect x="560" y="260" width="140" height="240" rx="30" fill="#0f172a"/>
+  <circle cx="250" cy="180" r="46" fill="#cbd5e1"/>
+  <circle cx="650" cy="190" r="46" fill="#cbd5e1"/>
+  <rect x="220" y="340" width="60" height="110" rx="24" fill="#e2e8f0" opacity="0.35"/>
+  <rect x="620" y="350" width="60" height="110" rx="24" fill="#e2e8f0" opacity="0.35"/>
+  <rect x="150" y="480" width="320" height="50" rx="25" fill="#38bdf8" opacity="0.22"/>
+  <rect x="430" y="470" width="320" height="55" rx="25" fill="#8b5cf6" opacity="0.22"/>
+  <path d="M280 340c60 0 90-40 120-40s60 0 90 20" fill="none" stroke="#94a3b8" stroke-width="12" stroke-linecap="round"/>
+  <text x="120" y="80" fill="#fff" font-family="Inter, sans-serif" font-size="44" font-weight="700">Teamwork</text>
+  <text x="120" y="132" fill="#94a3b8" font-family="Inter, sans-serif" font-size="24">Collaborating on design strategy</text>
+</svg>

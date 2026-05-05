@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="container nav-inner">
+        <a class="logo" href="index.html">MyPortfolio</a>
+        <nav class="menu">
+            <a class="nav-link" href="index.html">Home</a>
+            <a class="nav-link" href="about.html">About</a>
+            <a class="nav-link" href="projects.html">Projects</a>
+            <a class="nav-link active" href="contact.html">Contact</a>
+        </nav>
+    </div>
+</header>
+<main class="container">
+    <section class="section">
+        <div class="section-title">Get in Touch</div>
+        <div class="grid grid-2">
+            <div class="content-card">
+                <h2>Let's build something together.</h2>
+                <p>If you have a project, idea, or collaboration in mind, send a message and I’ll respond quickly.</p>
+                <ul class="contact-list">
+                    <li><strong>Email:</strong> hello@example.com</li>
+                    <li><strong>Location:</strong> Remote / Flexible</li>
+                </ul>
+            </div>
+            <form id="contactForm" class="contact-form" method="POST" action="/api/contact">
+                <label>
+                    Name
+                    <input name="name" type="text" placeholder="Your name" required>
+                </label>
+                <label>
+                    Email
+                    <input name="email" type="email" placeholder="you@example.com" required>
+                </label>
+                <label>
+                    Message
+                    <textarea name="message" rows="5" placeholder="Tell me about your project" required></textarea>
+                </label>
+                <button class="btn-primary" type="submit">Send Message</button>
+                <div id="formStatus" class="status-message"></div>
+            </form>
+        </div>
+    </section>
+    <script>
+        const form = document.getElementById('contactForm');
+        const status = document.getElementById('formStatus');
+
+        async function submitContactForm(event) {
+            event.preventDefault();
+            status.textContent = 'Sending message…';
+            status.className = 'status-message status-pending';
+
+            const data = {
+                name: form.name.value,
+                email: form.email.value,
+                message: form.message.value,
+            };
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                let result;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(text ? `Unexpected server response: ${text}` : 'Server returned an empty response.');
+                }
+
+                if (result.success) {
+                    status.textContent = result.sent ? 'Message sent successfully!' : 'Message saved locally. Email sending is not configured.';
+                    status.className = 'status-message status-success';
+                    form.reset();
+                } else {
+                    throw new Error(result.error || 'Submission failed.');
+                }
+            } catch (error) {
+                status.textContent = error.message || 'Unable to send your message at this time.';
+                status.className = 'status-message status-error';
+            }
+        }
+
+        if (!['http:', 'https:'].includes(window.location.protocol)) {
+            status.textContent = 'Please open this page through the local server (http://localhost:3000) to send your message.';
+            status.className = 'status-message status-error';
+            form.querySelector('button[type="submit"]').disabled = true;
+        } else {
+            form.addEventListener('submit', submitContactForm);
+        }
+    </script>
+</main>
+<footer>
+    <div class="container footer-note">Responsive, modern, and easy to customize.</div>
+</footer>
+</body>
+</html>
