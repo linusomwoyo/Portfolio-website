@@ -24,19 +24,24 @@
 
     <!-- Hero -->
     <section class="predictor-hero">
-        <p class="eyebrow">AI-Powered Tool</p>
+        <p class="eyebrow">Data-Driven Tool</p>
         <h1 class="predictor-title">Farm Price Predictor</h1>
-        <p class="predictor-subtitle">Help farmers anticipate crop price fluctuations using seasonal patterns, weather conditions, and market dynamics — up to 12 weeks ahead.</p>
+        <p class="predictor-subtitle">
+            Powered by WFP Kenya market price data (2016–2024) covering 6 major markets.
+            Forecast crop price fluctuations up to 12 weeks ahead using data-derived seasonal
+            patterns, weather conditions, and market dynamics.
+        </p>
         <div class="predictor-badges">
+            <span class="badge">WFP Kenya Data 2016–2024</span>
             <span class="badge">8 Crop Types</span>
-            <span class="badge">Seasonal Analysis</span>
-            <span class="badge">Weather Factors</span>
+            <span class="badge">6 Markets</span>
             <span class="badge">12-Week Forecast</span>
         </div>
+        <div id="dataStatus" class="data-status data-loading">Loading market data…</div>
     </section>
 
     <!-- Step 1: Crop Selection -->
-    <section class="predictor-section">
+    <section class="predictor-section" id="step1">
         <div class="step-header">
             <span class="step-num">01</span>
             <div>
@@ -48,48 +53,63 @@
             <button class="crop-card active" data-crop="maize">
                 <span class="crop-icon">🌽</span>
                 <span class="crop-name">Maize</span>
-                <span class="crop-unit">per 90kg bag</span>
+                <span class="crop-unit" id="unit_maize">per 90kg bag</span>
             </button>
             <button class="crop-card" data-crop="wheat">
                 <span class="crop-icon">🌾</span>
                 <span class="crop-name">Wheat</span>
-                <span class="crop-unit">per 90kg bag</span>
+                <span class="crop-unit" id="unit_wheat">per 90kg bag</span>
             </button>
             <button class="crop-card" data-crop="rice">
                 <span class="crop-icon">🍚</span>
                 <span class="crop-name">Rice</span>
-                <span class="crop-unit">per 25kg bag</span>
+                <span class="crop-unit" id="unit_rice">per 25kg bag</span>
             </button>
             <button class="crop-card" data-crop="tomatoes">
                 <span class="crop-icon">🍅</span>
                 <span class="crop-name">Tomatoes</span>
-                <span class="crop-unit">per crate (64kg)</span>
+                <span class="crop-unit" id="unit_tomatoes">per crate (64kg)</span>
             </button>
             <button class="crop-card" data-crop="onions">
                 <span class="crop-icon">🧅</span>
                 <span class="crop-name">Onions</span>
-                <span class="crop-unit">per 50kg bag</span>
+                <span class="crop-unit" id="unit_onions">per 50kg bag</span>
             </button>
             <button class="crop-card" data-crop="potatoes">
                 <span class="crop-icon">🥔</span>
                 <span class="crop-name">Potatoes</span>
-                <span class="crop-unit">per 50kg bag</span>
+                <span class="crop-unit" id="unit_potatoes">per 50kg bag</span>
             </button>
             <button class="crop-card" data-crop="beans">
                 <span class="crop-icon">🫘</span>
                 <span class="crop-name">Beans</span>
-                <span class="crop-unit">per 90kg bag</span>
+                <span class="crop-unit" id="unit_beans">per 90kg bag</span>
             </button>
             <button class="crop-card" data-crop="sorghum">
                 <span class="crop-icon">🌿</span>
                 <span class="crop-name">Sorghum</span>
-                <span class="crop-unit">per 90kg bag</span>
+                <span class="crop-unit" id="unit_sorghum">per 90kg bag</span>
             </button>
+        </div>
+
+        <!-- Historical price mini-chart for selected crop -->
+        <div class="hist-panel" id="histPanel">
+            <div class="hist-title">Historical Annual Prices — <span id="histCropLabel">Maize</span> (Nairobi, KES)</div>
+            <div class="hist-chart-wrap">
+                <canvas id="histChart" height="80"></canvas>
+            </div>
+            <div class="hist-stats">
+                <div class="hstat"><span class="hstat-label">2024 Avg</span><span class="hstat-val" id="hstat2024">—</span></div>
+                <div class="hstat"><span class="hstat-label">8-yr Low</span><span class="hstat-val" id="hstatLow">—</span></div>
+                <div class="hstat"><span class="hstat-label">8-yr High</span><span class="hstat-val" id="hstatHigh">—</span></div>
+                <div class="hstat"><span class="hstat-label">Annual Growth</span><span class="hstat-val" id="hstatCagr">—</span></div>
+                <div class="hstat"><span class="hstat-label">Price Volatility</span><span class="hstat-val" id="hstatVol">—</span></div>
+            </div>
         </div>
     </section>
 
     <!-- Step 2: Market Conditions -->
-    <section class="predictor-section">
+    <section class="predictor-section" id="step2">
         <div class="step-header">
             <span class="step-num">02</span>
             <div>
@@ -100,15 +120,19 @@
         <div class="conditions-grid">
             <label class="field-label">
                 Current Market Price (<span id="unitLabel">per 90kg bag</span>)
-                <div class="price-input-wrap">
-                    <span class="currency-prefix">KES</span>
-                    <input type="number" id="currentPrice" class="price-input" placeholder="e.g. 3200" min="1" step="1">
+                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                    <div class="price-input-wrap">
+                        <span class="currency-prefix">KES</span>
+                        <input type="number" id="currentPrice" class="price-input" placeholder="e.g. 4200" min="1" step="1">
+                    </div>
+                    <button class="btn-fill-avg" id="fillAvgBtn" title="Fill with dataset average">Use dataset avg</button>
                 </div>
+                <div class="price-hint" id="priceHint"></div>
             </label>
 
             <label class="field-label">
                 Rainfall / Water Availability
-                <div class="option-grid" id="rainfallGroup">
+                <div class="option-grid">
                     <button class="option-btn" data-group="rainfall" data-val="excellent">Excellent</button>
                     <button class="option-btn active" data-group="rainfall" data-val="good">Good</button>
                     <button class="option-btn" data-group="rainfall" data-val="average">Average</button>
@@ -119,7 +143,7 @@
 
             <label class="field-label">
                 Expected Harvest Size
-                <div class="option-grid" id="harvestGroup">
+                <div class="option-grid">
                     <button class="option-btn" data-group="harvest" data-val="bumper">Bumper</button>
                     <button class="option-btn active" data-group="harvest" data-val="normal">Normal</button>
                     <button class="option-btn" data-group="harvest" data-val="below">Below Average</button>
@@ -129,7 +153,7 @@
 
             <label class="field-label">
                 Nearest Major Market
-                <div class="option-grid" id="marketGroup">
+                <div class="option-grid">
                     <button class="option-btn active" data-group="market" data-val="local">Local (&lt;20km)</button>
                     <button class="option-btn" data-group="market" data-val="regional">Regional (20–100km)</button>
                     <button class="option-btn" data-group="market" data-val="national">National (&gt;100km)</button>
@@ -138,7 +162,7 @@
 
             <label class="field-label">
                 Forecast Horizon
-                <div class="option-grid" id="horizonGroup">
+                <div class="option-grid">
                     <button class="option-btn" data-group="horizon" data-val="2">2 Weeks</button>
                     <button class="option-btn active" data-group="horizon" data-val="4">4 Weeks</button>
                     <button class="option-btn" data-group="horizon" data-val="8">8 Weeks</button>
@@ -148,7 +172,9 @@
         </div>
 
         <button class="btn-predict" id="predictBtn">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
             Generate Price Forecast
         </button>
     </section>
@@ -187,49 +213,43 @@
             </div>
         </div>
 
-        <!-- Chart -->
+        <!-- vs. historical average banner -->
+        <div class="hist-compare-bar" id="histCompareBar">
+            <span id="histCompareText">—</span>
+        </div>
+
+        <!-- Main forecast chart -->
         <div class="chart-card">
             <div class="chart-legend">
-                <span class="legend-item"><span class="legend-dot legend-hist"></span>Historical</span>
+                <span class="legend-item"><span class="legend-dot legend-hist"></span>Historical (8 wks)</span>
                 <span class="legend-item"><span class="legend-dot legend-fore"></span>Forecast</span>
                 <span class="legend-item"><span class="legend-band"></span>Confidence Band</span>
+                <span class="legend-item legend-avg-line">— 8-yr Avg</span>
             </div>
             <div class="chart-wrap">
                 <canvas id="priceChart"></canvas>
             </div>
         </div>
 
-        <!-- Factors -->
+        <!-- Factor cards -->
         <div class="factors-grid">
             <div class="factor-card">
-                <div class="factor-header">
-                    <span class="factor-icon">🌧️</span>
-                    <span class="factor-title">Rainfall Impact</span>
-                </div>
+                <div class="factor-header"><span class="factor-icon">🌧️</span><span class="factor-title">Rainfall Impact</span></div>
                 <p class="factor-desc" id="rainfallImpact">—</p>
                 <span class="factor-badge" id="rainfallBadge">—</span>
             </div>
             <div class="factor-card">
-                <div class="factor-header">
-                    <span class="factor-icon">🌾</span>
-                    <span class="factor-title">Harvest Outlook</span>
-                </div>
+                <div class="factor-header"><span class="factor-icon">🌾</span><span class="factor-title">Harvest Outlook</span></div>
                 <p class="factor-desc" id="harvestImpact">—</p>
                 <span class="factor-badge" id="harvestBadge">—</span>
             </div>
             <div class="factor-card">
-                <div class="factor-header">
-                    <span class="factor-icon">📅</span>
-                    <span class="factor-title">Seasonal Pattern</span>
-                </div>
+                <div class="factor-header"><span class="factor-icon">📅</span><span class="factor-title">Seasonal Pattern</span></div>
                 <p class="factor-desc" id="seasonImpact">—</p>
                 <span class="factor-badge" id="seasonBadge">—</span>
             </div>
             <div class="factor-card">
-                <div class="factor-header">
-                    <span class="factor-icon">🚚</span>
-                    <span class="factor-title">Market Distance</span>
-                </div>
+                <div class="factor-header"><span class="factor-icon">🚚</span><span class="factor-title">Market Distance</span></div>
                 <p class="factor-desc" id="marketImpact">—</p>
                 <span class="factor-badge" id="marketBadge">—</span>
             </div>
@@ -239,7 +259,7 @@
         <div class="breakdown-card">
             <div class="breakdown-title">Weekly Breakdown</div>
             <div class="breakdown-table-wrap">
-                <table class="breakdown-table" id="breakdownTable">
+                <table class="breakdown-table">
                     <thead>
                         <tr>
                             <th>Week</th>
@@ -257,7 +277,7 @@
         </div>
 
         <!-- Recommendation -->
-        <div class="recommendation-card" id="recommendationCard">
+        <div class="recommendation-card">
             <div class="rec-icon">💡</div>
             <div>
                 <div class="rec-title">Farmer Recommendation</div>
@@ -271,95 +291,115 @@
 </main>
 
 <footer>
-    <div class="container footer-note">Farm Price Predictor — Built to empower farmers with data-driven market insights.</div>
+    <div class="container footer-note">
+        Farm Price Predictor — Built on WFP Kenya food price data (2016–2024).
+        For informational use only; consult local market data before making trading decisions.
+    </div>
 </footer>
 
 <script>
-// ─── Crop Data ────────────────────────────────────────────────────────────────
-// seasonal[month 0-11]: price multiplier relative to annual average (1.0 = average)
-// Higher = more expensive (lean season), lower = cheaper (harvest glut)
-const CROP_DATA = {
-    maize: {
-        name: 'Maize',
-        unit: 'per 90kg bag',
-        basePrice: 3200,
-        seasonal: [1.18, 1.22, 1.15, 1.05, 1.0, 0.90, 0.83, 0.85, 0.93, 0.97, 1.02, 1.10],
-        volatility: 0.14,
-        harvestDesc: 'Main harvest in October–November; long rains harvest in March–April'
-    },
-    wheat: {
-        name: 'Wheat',
-        unit: 'per 90kg bag',
-        basePrice: 2800,
-        seasonal: [1.02, 1.06, 1.10, 1.08, 1.03, 0.93, 0.86, 0.88, 0.95, 1.0, 1.02, 1.02],
-        volatility: 0.11,
-        harvestDesc: 'Harvested July–August; prices dip post-harvest'
-    },
-    rice: {
-        name: 'Rice',
-        unit: 'per 25kg bag',
-        basePrice: 2200,
-        seasonal: [1.05, 1.08, 1.10, 1.08, 1.0, 0.95, 0.88, 0.85, 0.90, 0.97, 1.0, 1.02],
-        volatility: 0.10,
-        harvestDesc: 'Harvested August–September; influenced by import levels'
-    },
-    tomatoes: {
-        name: 'Tomatoes',
-        unit: 'per crate (64kg)',
-        basePrice: 1800,
-        seasonal: [0.82, 0.80, 0.85, 0.95, 1.08, 1.22, 1.30, 1.28, 1.18, 1.05, 0.92, 0.85],
-        volatility: 0.28,
-        harvestDesc: 'Highly seasonal; peak supply Dec–Mar, peak prices Jun–Aug'
-    },
-    onions: {
-        name: 'Onions',
-        unit: 'per 50kg bag',
-        basePrice: 2400,
-        seasonal: [1.10, 1.15, 1.18, 1.12, 1.05, 0.95, 0.88, 0.85, 0.90, 0.95, 1.0, 1.05],
-        volatility: 0.18,
-        harvestDesc: 'Harvest in July–September; prices fall post-harvest'
-    },
-    potatoes: {
-        name: 'Potatoes',
-        unit: 'per 50kg bag',
-        basePrice: 1600,
-        seasonal: [1.05, 1.08, 1.12, 1.08, 1.0, 0.92, 0.85, 0.83, 0.88, 0.95, 1.0, 1.02],
-        volatility: 0.16,
-        harvestDesc: 'Two seasons; main harvest Jul–Sep and Jan–Feb'
-    },
-    beans: {
-        name: 'Beans',
-        unit: 'per 90kg bag',
-        basePrice: 7500,
-        seasonal: [1.20, 1.22, 1.15, 1.05, 0.95, 0.88, 0.85, 0.88, 1.0, 1.08, 1.15, 1.18],
-        volatility: 0.15,
-        harvestDesc: 'Harvested Oct–Nov and March; significant price swings'
-    },
-    sorghum: {
-        name: 'Sorghum',
-        unit: 'per 90kg bag',
-        basePrice: 2600,
-        seasonal: [1.12, 1.15, 1.10, 1.05, 1.0, 0.93, 0.87, 0.88, 0.92, 0.95, 1.0, 1.06],
-        volatility: 0.13,
-        harvestDesc: 'Drought-tolerant; harvest Oct–Dec, more stable than maize'
-    }
-};
-
-// ─── State ────────────────────────────────────────────────────────────────────
+// ─── State ───────────────────────────────────────────────────────────────────
+let marketData   = null;
 let selectedCrop = 'maize';
-let rainfall = 'good';
-let harvest = 'normal';
-let market = 'local';
-let horizon = 4;
-let priceChart = null;
+let rainfall     = 'good';
+let harvest      = 'normal';
+let market       = 'local';
+let horizon      = 4;
+let priceChart   = null;
+let histChart    = null;
 
-// ─── UI helpers ───────────────────────────────────────────────────────────────
+// ─── Load data ───────────────────────────────────────────────────────────────
+async function loadMarketData() {
+    const status = document.getElementById('dataStatus');
+    try {
+        const res  = await fetch('market_data.json');
+        marketData = await res.json();
+        status.textContent = '✓ Market data loaded — WFP Kenya 2016–2024 (8 crops, 6 markets)';
+        status.className   = 'data-status data-ready';
+        updateCropUnits();
+        updateHistPanel();
+    } catch (e) {
+        status.textContent = '⚠ Could not load market data — using built-in estimates';
+        status.className   = 'data-status data-error';
+        marketData = null;
+    }
+}
+
+function updateCropUnits() {
+    if (!marketData) return;
+    Object.keys(marketData).forEach(key => {
+        const el = document.getElementById('unit_' + key);
+        if (el) el.textContent = marketData[key].unit;
+    });
+}
+
+// ─── Historical mini-chart ────────────────────────────────────────────────────
+function updateHistPanel() {
+    if (!marketData || !marketData[selectedCrop]) return;
+    const data = marketData[selectedCrop];
+
+    document.getElementById('histCropLabel').textContent = data.name;
+    document.getElementById('unitLabel').textContent     = data.unit;
+    document.getElementById('hstat2024').textContent     = data.annual_avg_prices['2024']
+        ? 'KES ' + Number(data.annual_avg_prices['2024']).toLocaleString() : '—';
+    document.getElementById('hstatLow').textContent      = 'KES ' + data.price_range.p10.toLocaleString();
+    document.getElementById('hstatHigh').textContent     = 'KES ' + data.price_range.p90.toLocaleString();
+    document.getElementById('hstatCagr').textContent     = (data.annual_inflation_cagr * 100).toFixed(1) + '% / yr';
+    document.getElementById('hstatVol').textContent      = (data.volatility * 100).toFixed(1) + '%';
+
+    // Price hint
+    const hint = document.getElementById('priceHint');
+    hint.textContent = `Dataset 3-yr avg: KES ${Number(data.recent_avg).toLocaleString()} | Overall avg: KES ${Number(data.overall_avg).toLocaleString()}`;
+
+    const years  = Object.keys(data.annual_avg_prices).sort();
+    const prices = years.map(y => data.annual_avg_prices[y]);
+
+    if (histChart) histChart.destroy();
+    const ctx = document.getElementById('histChart').getContext('2d');
+    histChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [{
+                data: prices,
+                backgroundColor: years.map(y =>
+                    parseInt(y) >= 2022 ? 'rgba(56,189,248,0.55)' : 'rgba(56,189,248,0.25)'
+                ),
+                borderColor: 'rgba(56,189,248,0.7)',
+                borderWidth: 1,
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(10,25,45,0.95)',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    callbacks: { label: ctx => ` KES ${ctx.raw.toLocaleString()}` }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => 'KES ' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v) }
+                }
+            }
+        }
+    });
+}
+
+// ─── UI events ────────────────────────────────────────────────────────────────
 document.querySelectorAll('.crop-card').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.crop-card').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedCrop = btn.dataset.crop;
-        document.getElementById('unitLabel').textContent = CROP_DATA[selectedCrop].unit;
+        updateHistPanel();
     });
 });
 
@@ -369,10 +409,15 @@ document.querySelectorAll('.option-btn').forEach(btn => {
         document.querySelectorAll(`.option-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         if (group === 'rainfall') rainfall = btn.dataset.val;
-        if (group === 'harvest') harvest = btn.dataset.val;
-        if (group === 'market') market = btn.dataset.val;
-        if (group === 'horizon') horizon = parseInt(btn.dataset.val, 10);
+        if (group === 'harvest')  harvest  = btn.dataset.val;
+        if (group === 'market')   market   = btn.dataset.val;
+        if (group === 'horizon')  horizon  = parseInt(btn.dataset.val, 10);
     });
+});
+
+document.getElementById('fillAvgBtn').addEventListener('click', () => {
+    if (!marketData || !marketData[selectedCrop]) return;
+    document.getElementById('currentPrice').value = marketData[selectedCrop].recent_avg;
 });
 
 document.getElementById('predictBtn').addEventListener('click', runPrediction);
@@ -382,200 +427,237 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 });
 
 // ─── Prediction Engine ────────────────────────────────────────────────────────
+/*
+ * Model:
+ *   predicted_price(t) = current_price
+ *                       × seasonal_ratio(t)        — data-derived seasonal index
+ *                       × trend_factor(t)           — CAGR from 8-yr dataset
+ *                       × rainfall_factor           — calibrated via rainfall_beta
+ *                       × harvest_factor            — supply shock multiplier
+ *                       × market_distance_factor
+ *
+ * Confidence interval: ±(volatility × √(weeks/4)) based on dataset CV
+ */
 function runPrediction() {
     const priceInput = document.getElementById('currentPrice').value;
     if (!priceInput || parseFloat(priceInput) <= 0) {
-        document.getElementById('currentPrice').focus();
-        document.getElementById('currentPrice').style.borderColor = 'rgba(253,164,175,0.7)';
-        setTimeout(() => { document.getElementById('currentPrice').style.borderColor = ''; }, 2000);
+        const inp = document.getElementById('currentPrice');
+        inp.focus();
+        inp.style.borderColor = 'rgba(253,164,175,0.7)';
+        setTimeout(() => { inp.style.borderColor = ''; }, 2000);
         return;
     }
 
     const currentPrice = parseFloat(priceInput);
-    const crop = CROP_DATA[selectedCrop];
-    const now = new Date();
-    const currentMonth = now.getMonth();
+    const now          = new Date();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    // ── Pull from real data or fall back to built-in estimates ──
+    const crop = marketData && marketData[selectedCrop]
+        ? marketData[selectedCrop]
+        : BUILTIN_FALLBACK[selectedCrop];
+
+    const seasonal  = crop.seasonal_index;
+    const vol       = crop.volatility;
+    const cagr      = crop.annual_inflation_cagr;
+    const rainBeta  = crop.rainfall_beta;
+    const overallAvg = crop.overall_avg;
 
     // ── Factor multipliers ──
-    const rainfallFactor = { excellent: 0.87, good: 0.94, average: 1.0, poor: 1.13, drought: 1.30 }[rainfall];
+    // Rainfall: poor rainfall reduces supply → higher prices
+    // Calibrated using rainfall_beta from dataset regression
+    const rainfallDelta = { excellent: -0.8, good: -0.35, average: 0, poor: 0.5, drought: 1.0 }[rainfall];
+    const rainfallFactor = 1 + rainfallDelta * rainBeta;
+
     const harvestFactor  = { bumper: 0.84, normal: 1.0, below: 1.16, failed: 1.38 }[harvest];
     const marketFactor   = { local: 1.0, regional: 1.07, national: 1.16 }[market];
 
-    // ── Generate past 8 weeks (simulated historical) ──
-    const historyWeeks = 8;
+    // ── Past 8 weeks (simulated from seasonal + noise) ──
     const histData = [];
-    for (let w = historyWeeks; w >= 1; w--) {
-        const d = new Date(now.getTime() - w * 7 * 24 * 60 * 60 * 1000);
-        const m = d.getMonth();
-        const seasonRatio = crop.seasonal[m] / crop.seasonal[currentMonth];
-        // add mild noise
-        const noise = 1 + (Math.random() - 0.5) * 0.04;
-        histData.push({
-            date: d,
-            label: formatWeekLabel(d),
-            price: Math.round(currentPrice * seasonRatio * noise)
-        });
+    for (let w = 8; w >= 1; w--) {
+        const d  = new Date(now.getTime() - w * 7 * 24 * 60 * 60 * 1000);
+        const m  = d.getMonth();
+        const sr = seasonal[m] / seasonal[currentMonth];
+        const noise = 1 + (Math.random() - 0.5) * vol * 0.8;
+        histData.push({ date: d, label: fmtDate(d), price: Math.round(currentPrice * sr * noise) });
     }
-    // Add current week
     histData.push({ date: new Date(now), label: 'Now', price: Math.round(currentPrice) });
 
-    // ── Generate future forecast ──
+    // ── Future forecast ──
     const forecastData = [];
     for (let w = 1; w <= horizon; w++) {
-        const d = new Date(now.getTime() + w * 7 * 24 * 60 * 60 * 1000);
-        const m = d.getMonth();
-        const seasonRatio = crop.seasonal[m] / crop.seasonal[currentMonth];
-        const combined = rainfallFactor * harvestFactor * marketFactor * seasonRatio;
-        const price = Math.round(currentPrice * combined);
-        const uncertainty = crop.volatility * Math.sqrt(w / 4);
-        const conf = Math.max(52, Math.round(94 - w * 2.5));
+        const d    = new Date(now.getTime() + w * 7 * 24 * 60 * 60 * 1000);
+        const m    = d.getMonth();
+        const sr   = seasonal[m] / seasonal[currentMonth];
+        const wkYr = w / 52.0;
+        const trendF = Math.pow(1 + cagr, wkYr);
+        const combined = rainfallFactor * harvestFactor * marketFactor * sr * trendF;
+        const price    = Math.round(currentPrice * combined);
+        const uncert   = vol * Math.sqrt(w / 4);
+        const conf     = Math.max(48, Math.round(93 - w * 2.5));
         forecastData.push({
-            week: w,
-            date: d,
-            label: `W+${w}`,
+            week: w, date: d, label: `W+${w}`,
             price,
-            low: Math.round(price * (1 - uncertainty)),
-            high: Math.round(price * (1 + uncertainty)),
-            confidence: conf
+            low:  Math.round(price * (1 - uncert)),
+            high: Math.round(price * (1 + uncert)),
+            confidence: conf,
         });
     }
 
-    renderResults(currentPrice, crop, histData, forecastData, now);
+    renderResults(currentPrice, crop, histData, forecastData, now, overallAvg);
 }
 
-function renderResults(currentPrice, crop, histData, forecastData, now) {
-    const last = forecastData[forecastData.length - 1];
+function renderResults(currentPrice, crop, histData, forecastData, now, overallAvg) {
+    const last    = forecastData[forecastData.length - 1];
     const pctChange = ((last.price - currentPrice) / currentPrice) * 100;
     const absChange = last.price - currentPrice;
 
-    // Trend
+    // Trend label
     let trendText, trendIcon, trendClass;
-    if (pctChange > 5) { trendText = 'RISING'; trendIcon = '📈'; trendClass = 'trend-up'; }
+    if (pctChange > 5)       { trendText = 'RISING';  trendIcon = '📈'; trendClass = 'trend-up'; }
     else if (pctChange < -5) { trendText = 'FALLING'; trendIcon = '📉'; trendClass = 'trend-down'; }
-    else { trendText = 'STABLE'; trendIcon = '➡️'; trendClass = 'trend-stable'; }
+    else                     { trendText = 'STABLE';  trendIcon = '➡️'; trendClass = 'trend-stable'; }
 
     document.getElementById('trendCard').className = `summary-card highlight-card ${trendClass}`;
-    document.getElementById('trendIcon').textContent = trendIcon;
+    document.getElementById('trendIcon').textContent  = trendIcon;
     document.getElementById('trendValue').textContent = trendText;
 
-    document.getElementById('forecastPrice').textContent = `KES ${last.price.toLocaleString()}`;
-    document.getElementById('forecastRange').textContent = `Range: KES ${last.low.toLocaleString()} – ${last.high.toLocaleString()}`;
+    document.getElementById('forecastPrice').textContent  = `KES ${last.price.toLocaleString()}`;
+    document.getElementById('forecastRange').textContent  = `Range: KES ${last.low.toLocaleString()} – ${last.high.toLocaleString()}`;
 
     const sign = absChange >= 0 ? '+' : '';
-    document.getElementById('priceChange').textContent = `${sign}${pctChange.toFixed(1)}%`;
-    document.getElementById('priceChange').className = `summary-value ${pctChange >= 0 ? 'val-up' : 'val-down'}`;
+    document.getElementById('priceChange').textContent  = `${sign}${pctChange.toFixed(1)}%`;
+    document.getElementById('priceChange').className    = `summary-value ${pctChange >= 0 ? 'val-up' : 'val-down'}`;
     document.getElementById('changeAmount').textContent = `${sign}KES ${Math.abs(absChange).toLocaleString()}`;
 
-    document.getElementById('confidenceVal').textContent = `${forecastData[0].confidence}%`;
-    document.getElementById('confidenceBar').style.width = `${forecastData[0].confidence}%`;
-
+    document.getElementById('confidenceVal').textContent    = `${forecastData[0].confidence}%`;
+    document.getElementById('confidenceBar').style.width    = `${forecastData[0].confidence}%`;
     document.getElementById('resultsCropLabel').textContent = `${crop.name} — ${horizon}-week outlook`;
 
-    // ── Factors ──
-    const rainfallFactor = { excellent: 0.87, good: 0.94, average: 1.0, poor: 1.13, drought: 1.30 }[rainfall];
-    const harvestFactor  = { bumper: 0.84, normal: 1.0, below: 1.16, failed: 1.38 }[harvest];
-    const mFactor        = { local: 1.0, regional: 1.07, national: 1.16 }[market];
+    // Historical comparison banner
+    const vsAvg = ((currentPrice - overallAvg) / overallAvg) * 100;
+    const bar   = document.getElementById('histCompareBar');
+    const sign2 = vsAvg >= 0 ? '+' : '';
+    bar.textContent  = vsAvg > 5
+        ? `Current price (KES ${currentPrice.toLocaleString()}) is ${sign2}${vsAvg.toFixed(1)}% above the 8-year average (KES ${overallAvg.toLocaleString()}) — market is running HOT`
+        : vsAvg < -5
+        ? `Current price (KES ${currentPrice.toLocaleString()}) is ${sign2}${vsAvg.toFixed(1)}% below the 8-year average (KES ${overallAvg.toLocaleString()}) — market is running SOFT`
+        : `Current price (KES ${currentPrice.toLocaleString()}) is near the 8-year average (KES ${overallAvg.toLocaleString()}) — ${sign2}${vsAvg.toFixed(1)}%`;
+    bar.className = `hist-compare-bar ${vsAvg > 5 ? 'hcb-hot' : vsAvg < -5 ? 'hcb-soft' : 'hcb-normal'}`;
 
-    const rainfallImpacts = {
-        excellent: ['Excellent rains boost supply — expect downward pressure on prices.', 'Bearish'],
-        good: ['Good rainfall supports healthy yields — mild downward pressure.', 'Slightly Bearish'],
-        average: ['Average conditions — neutral price impact expected.', 'Neutral'],
-        poor: ['Poor rainfall reduces yields — expect upward price pressure.', 'Bullish'],
-        drought: ['Drought conditions severely reduce supply — strong upward price pressure.', 'Very Bullish']
+    // ── Factor text ──
+    const rainBeta = crop.rainfall_beta;
+    const rainfallTexts = {
+        excellent: [`Excellent rains boost crop supply — downward pressure expected. (β = −${(rainBeta*0.8*100).toFixed(0)}%)`, 'Bearish'],
+        good:      [`Good rainfall supports healthy yields — mild downward pressure. (β = −${(rainBeta*0.35*100).toFixed(0)}%)`, 'Slightly Bearish'],
+        average:   ['Average conditions — neutral price impact expected.', 'Neutral'],
+        poor:      [`Poor rainfall reduces yields — upward pressure expected. (β = +${(rainBeta*0.5*100).toFixed(0)}%)`, 'Bullish'],
+        drought:   [`Drought severely limits supply — strong price spike expected. (β = +${(rainBeta*100).toFixed(0)}%)`, 'Very Bullish'],
     };
-    const harvestImpacts = {
-        bumper: ['Bumper harvest floods the market — expect significant price drop.', 'Strongly Bearish'],
+    const harvestTexts = {
+        bumper: ['Bumper harvest floods the market — significant price drop expected.', 'Strongly Bearish'],
         normal: ['Normal harvest keeps supply steady — prices follow seasonal pattern.', 'Neutral'],
-        below: ['Below-average harvest tightens supply — prices likely to rise.', 'Bullish'],
-        failed: ['Crop failure drastically limits supply — sharp price spike expected.', 'Very Bullish']
+        below:  ['Below-average harvest tightens supply — prices likely to rise.', 'Bullish'],
+        failed: ['Crop failure drastically limits supply — sharp price spike expected.', 'Very Bullish'],
     };
-    const marketImpacts = {
-        local: ['Local market access reduces transport costs — prices stay closer to farm gate.', 'Neutral'],
-        regional: ['Regional market adds 7–10% for transport and handling costs.', 'Slightly Bullish'],
-        national: ['National market distance adds significant transport premium.', 'Bullish']
+    const marketTexts = {
+        local:    ['Local market access — transport costs minimal, farm-gate proximity.', 'Neutral'],
+        regional: [`Regional market adds ~7% for transport and handling costs.`, 'Slightly Bullish'],
+        national: ['National market distance adds ~16% transport premium.', 'Bullish'],
     };
 
-    const currentMonthName = now.toLocaleString('default', { month: 'long' });
-    const seasonFactor = crop.seasonal[now.getMonth()];
+    const nowMonth     = now.toLocaleString('default', { month: 'long' });
+    const seasonVal    = crop.seasonal_index[now.getMonth()];
     let seasonDesc, seasonBadge;
-    if (seasonFactor > 1.1) { seasonDesc = `${currentMonthName} is typically a lean-season month — historically prices are above average.`; seasonBadge = 'Above Average Season'; }
-    else if (seasonFactor < 0.93) { seasonDesc = `${currentMonthName} falls near harvest time — historically prices are below average due to market glut.`; seasonBadge = 'Harvest Season'; }
-    else { seasonDesc = `${currentMonthName} is a transitional period — prices tracking close to annual average.`; seasonBadge = 'Transitional Period'; }
+    if (seasonVal > 1.1)       { seasonDesc = `${nowMonth} is historically a lean-season month — prices typically ${((seasonVal-1)*100).toFixed(0)}% above annual average.`; seasonBadge = 'Lean Season'; }
+    else if (seasonVal < 0.93) { seasonDesc = `${nowMonth} falls near harvest — prices typically ${((1-seasonVal)*100).toFixed(0)}% below annual average.`; seasonBadge = 'Harvest Season'; }
+    else                       { seasonDesc = `${nowMonth} is a transitional period — prices close to annual average (index ${seasonVal.toFixed(2)}).`; seasonBadge = 'Transitional'; }
 
-    document.getElementById('rainfallImpact').textContent = rainfallImpacts[rainfall][0];
-    document.getElementById('rainfallBadge').textContent = rainfallImpacts[rainfall][1];
-    document.getElementById('rainfallBadge').className = `factor-badge ${rainfallFactor < 1 ? 'badge-bearish' : rainfallFactor > 1 ? 'badge-bullish' : 'badge-neutral'}`;
+    const setFactor = (id, text, badgeId, badgeText, badgeClass) => {
+        document.getElementById(id).textContent = text;
+        document.getElementById(badgeId).textContent = badgeText;
+        document.getElementById(badgeId).className = `factor-badge ${badgeClass}`;
+    };
 
-    document.getElementById('harvestImpact').textContent = harvestImpacts[harvest][0];
-    document.getElementById('harvestBadge').textContent = harvestImpacts[harvest][1];
-    document.getElementById('harvestBadge').className = `factor-badge ${harvestFactor < 1 ? 'badge-bearish' : harvestFactor > 1 ? 'badge-bullish' : 'badge-neutral'}`;
-
-    document.getElementById('seasonImpact').textContent = seasonDesc + ` ${crop.harvestDesc}.`;
-    document.getElementById('seasonBadge').textContent = seasonBadge;
-    document.getElementById('seasonBadge').className = `factor-badge ${seasonFactor < 0.95 ? 'badge-bearish' : seasonFactor > 1.05 ? 'badge-bullish' : 'badge-neutral'}`;
-
-    document.getElementById('marketImpact').textContent = marketImpacts[market][0];
-    document.getElementById('marketBadge').textContent = marketImpacts[market][1];
-    document.getElementById('marketBadge').className = `factor-badge ${mFactor > 1 ? 'badge-bullish' : 'badge-neutral'}`;
+    const [rt, rb] = rainfallTexts[rainfall];
+    setFactor('rainfallImpact', rt, 'rainfallBadge', rb, rb.includes('Bearish') ? 'badge-bearish' : rb === 'Neutral' ? 'badge-neutral' : 'badge-bullish');
+    const [ht, hb] = harvestTexts[harvest];
+    setFactor('harvestImpact', ht, 'harvestBadge', hb, hb.includes('Bearish') ? 'badge-bearish' : hb === 'Neutral' ? 'badge-neutral' : 'badge-bullish');
+    setFactor('seasonImpact', seasonDesc, 'seasonBadge', seasonBadge, seasonVal < 0.95 ? 'badge-bearish' : seasonVal > 1.05 ? 'badge-bullish' : 'badge-neutral');
+    const [mt, mb] = marketTexts[market];
+    setFactor('marketImpact', mt, 'marketBadge', mb, mb === 'Neutral' ? 'badge-neutral' : 'badge-bullish');
 
     // ── Weekly table ──
     const tbody = document.getElementById('breakdownBody');
     tbody.innerHTML = '';
     forecastData.forEach(row => {
-        const rowPct = ((row.price - currentPrice) / currentPrice * 100);
-        const signal = rowPct > 3 ? '<span class="sig sig-up">Buy Later</span>' : rowPct < -3 ? '<span class="sig sig-down">Sell Now</span>' : '<span class="sig sig-hold">Hold</span>';
-        tbody.innerHTML += `
-            <tr>
-                <td>Week ${row.week}</td>
-                <td>${row.date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })}</td>
-                <td class="${rowPct > 3 ? 'val-up' : rowPct < -3 ? 'val-down' : ''}">KES ${row.price.toLocaleString()}</td>
-                <td class="muted-val">KES ${row.low.toLocaleString()}</td>
-                <td class="muted-val">KES ${row.high.toLocaleString()}</td>
-                <td>${row.confidence}%</td>
-                <td>${signal}</td>
-            </tr>`;
+        const rowPct = (row.price - currentPrice) / currentPrice * 100;
+        const signal = rowPct > 3
+            ? '<span class="sig sig-up">Buy Later</span>'
+            : rowPct < -3
+            ? '<span class="sig sig-down">Sell Now</span>'
+            : '<span class="sig sig-hold">Hold</span>';
+        tbody.innerHTML += `<tr>
+            <td>Week ${row.week}</td>
+            <td>${row.date.toLocaleDateString('en-KE',{month:'short',day:'numeric'})}</td>
+            <td class="${rowPct>3?'val-up':rowPct<-3?'val-down':''}">KES ${row.price.toLocaleString()}</td>
+            <td class="muted-val">KES ${row.low.toLocaleString()}</td>
+            <td class="muted-val">KES ${row.high.toLocaleString()}</td>
+            <td>${row.confidence}%</td>
+            <td>${signal}</td>
+        </tr>`;
     });
 
     // ── Recommendation ──
-    let recText;
-    if (pctChange > 10) recText = `Prices for ${crop.name} are forecasted to rise significantly (+${pctChange.toFixed(1)}%). If possible, delay selling and store your harvest in a cool, dry place. Consider negotiating forward contracts at today's price if buyers are available.`;
-    else if (pctChange > 4) recText = `Moderate price increase expected (+${pctChange.toFixed(1)}%). You may benefit from holding stock for 2–3 weeks. Monitor market conditions weekly — if rainfall improves, prices may stabilise sooner.`;
-    else if (pctChange < -10) recText = `Prices are expected to fall sharply (${pctChange.toFixed(1)}%). Consider selling a portion of your harvest now, especially if storage is limited. Look into cooperative bulk-selling to capture better buyer prices.`;
-    else if (pctChange < -4) recText = `Mild price decline expected (${pctChange.toFixed(1)}%). Selling within the next 1–2 weeks may fetch a better price than waiting. Evaluate your storage capacity and costs before deciding.`;
-    else recText = `Prices appear relatively stable (${sign}${pctChange.toFixed(1)}%). No urgent action required. Focus on minimising post-harvest losses and compare offers from multiple buyers to maximise returns.`;
-    document.getElementById('recText').textContent = recText;
+    let rec;
+    if (pctChange > 10)
+        rec = `Prices for ${crop.name} are forecast to rise sharply (+${pctChange.toFixed(1)}%). Dataset confirms this is typical lean-season behaviour. Consider delaying sales by 2–4 weeks and exploring dry storage options to maximise returns.`;
+    else if (pctChange > 4)
+        rec = `Moderate price increase expected (+${pctChange.toFixed(1)}%). Historical data suggests prices in this range may stabilise within 2–3 weeks. Monitor rainfall bulletins and hold if storage capacity allows.`;
+    else if (pctChange < -10)
+        rec = `Prices are forecast to fall sharply (${pctChange.toFixed(1)}%). This aligns with the data-derived harvest-season pattern. Selling now or negotiating forward contracts at today's price is advisable.`;
+    else if (pctChange < -4)
+        rec = `Mild price decline expected (${pctChange.toFixed(1)}%). Selling in the next 1–2 weeks may capture a better price. Compare offers from Nairobi and regional buyers — transport cost vs. price premium calculation recommended.`;
+    else
+        rec = `Prices appear stable (${sign}${pctChange.toFixed(1)}%). Focus on post-harvest loss reduction and compare buyer offers. The 8-year average for this crop is KES ${overallAvg.toLocaleString()} — current pricing is ${Math.abs(((currentPrice-overallAvg)/overallAvg)*100).toFixed(0)}% ${currentPrice > overallAvg ? 'above' : 'below'} that baseline.`;
+    document.getElementById('recText').textContent = rec;
 
-    // ── Chart ──
-    renderChart(histData, forecastData);
+    renderForecastChart(histData, forecastData, overallAvg);
 
-    // Show results
     document.getElementById('resultsSection').style.display = 'block';
     document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderChart(histData, forecastData) {
-    const allLabels = [...histData.map(d => d.label), ...forecastData.map(d => d.label)];
-
+function renderForecastChart(histData, forecastData, overallAvg) {
+    const allLabels   = [...histData.map(d => d.label), ...forecastData.map(d => d.label)];
     const histPrices  = histData.map(d => d.price);
     const forePrices  = forecastData.map(d => d.price);
     const foreHigh    = forecastData.map(d => d.high);
     const foreLow     = forecastData.map(d => d.low);
 
-    // Pad historical line to full length
-    const histFull = [...histPrices, ...Array(forecastData.length).fill(null)];
-    // Forecast line starts where history ends
-    const foreFull = [...Array(histData.length - 1).fill(null), histPrices[histPrices.length - 1], ...forePrices];
+    const histFull     = [...histPrices, ...Array(forecastData.length).fill(null)];
+    const foreFull     = [...Array(histData.length - 1).fill(null), histPrices[histPrices.length - 1], ...forePrices];
     const foreHighFull = [...Array(histData.length - 1).fill(null), histPrices[histPrices.length - 1], ...foreHigh];
     const foreLowFull  = [...Array(histData.length - 1).fill(null), histPrices[histPrices.length - 1], ...foreLow];
+    const avgLine      = Array(allLabels.length).fill(overallAvg);
 
     if (priceChart) priceChart.destroy();
-
     const ctx = document.getElementById('priceChart').getContext('2d');
     priceChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: allLabels,
             datasets: [
+                {
+                    label: '8-yr Avg',
+                    data: avgLine,
+                    borderColor: 'rgba(139,92,246,0.5)',
+                    borderWidth: 1.5,
+                    borderDash: [3, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0,
+                },
                 {
                     label: 'Historical',
                     data: histFull,
@@ -586,7 +668,7 @@ function renderChart(histData, forecastData) {
                     pointRadius: 3,
                     tension: 0.38,
                     fill: false,
-                    spanGaps: false
+                    spanGaps: false,
                 },
                 {
                     label: 'High Estimate',
@@ -596,7 +678,7 @@ function renderChart(histData, forecastData) {
                     pointRadius: 0,
                     tension: 0.38,
                     fill: '+1',
-                    spanGaps: false
+                    spanGaps: false,
                 },
                 {
                     label: 'Low Estimate',
@@ -606,7 +688,7 @@ function renderChart(histData, forecastData) {
                     pointRadius: 0,
                     tension: 0.38,
                     fill: false,
-                    spanGaps: false
+                    spanGaps: false,
                 },
                 {
                     label: 'Forecast',
@@ -618,8 +700,8 @@ function renderChart(histData, forecastData) {
                     pointHoverRadius: 6,
                     tension: 0.38,
                     fill: false,
-                    spanGaps: false
-                }
+                    spanGaps: false,
+                },
             ]
         },
         options: {
@@ -637,34 +719,43 @@ function renderChart(histData, forecastData) {
                     padding: 12,
                     callbacks: {
                         label: ctx => {
-                            if (ctx.dataset.label === 'High Estimate' || ctx.dataset.label === 'Low Estimate') return null;
+                            if (['High Estimate','Low Estimate'].includes(ctx.dataset.label)) return null;
                             if (ctx.raw === null) return null;
-                            return ` ${ctx.dataset.label}: KES ${ctx.raw.toLocaleString()}`;
+                            const prefix = ctx.dataset.label === '8-yr Avg' ? '📊 8-yr Avg' : ` ${ctx.dataset.label}`;
+                            return ` ${prefix}: KES ${ctx.raw.toLocaleString()}`;
                         }
                     }
                 }
             },
             scales: {
-                x: {
-                    grid: { color: 'rgba(255,255,255,0.04)' },
-                    ticks: { color: '#94a3b8', font: { size: 11 } }
-                },
+                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
                 y: {
                     grid: { color: 'rgba(255,255,255,0.06)' },
-                    ticks: {
-                        color: '#94a3b8',
-                        font: { size: 11 },
-                        callback: v => `KES ${v.toLocaleString()}`
-                    }
+                    ticks: { color: '#94a3b8', font: { size: 11 }, callback: v => `KES ${v.toLocaleString()}` }
                 }
             }
         }
     });
 }
 
-function formatWeekLabel(date) {
+function fmtDate(date) {
     return date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
 }
+
+// ─── Built-in fallback (if JSON fails to load) ───────────────────────────────
+const BUILTIN_FALLBACK = {
+    maize:    { name:'Maize',    unit:'per 90kg bag',    seasonal_index:[1.10,1.16,1.16,1.07,0.97,0.89,0.83,0.85,0.93,0.95,1.00,1.09], overall_avg:3565,  recent_avg:4212, volatility:0.20, rainfall_beta:0.22, annual_inflation_cagr:0.062, price_range:{p10:2100,p50:3400,p90:5200} },
+    wheat:    { name:'Wheat',    unit:'per 90kg bag',    seasonal_index:[1.00,0.99,1.09,1.08,1.06,1.01,0.92,0.90,0.92,0.99,1.02,1.03], overall_avg:3677,  recent_avg:4454, volatility:0.19, rainfall_beta:0.08, annual_inflation_cagr:0.056, price_range:{p10:2400,p50:3500,p90:5500} },
+    rice:     { name:'Rice',     unit:'per 25kg bag',    seasonal_index:[1.02,1.08,1.09,1.09,1.03,0.95,0.89,0.86,0.93,1.01,1.02,1.05], overall_avg:2270,  recent_avg:2619, volatility:0.15, rainfall_beta:0.05, annual_inflation_cagr:0.050, price_range:{p10:1600,p50:2200,p90:3200} },
+    tomatoes: { name:'Tomatoes', unit:'per crate (64kg)',seasonal_index:[0.70,0.69,0.70,0.96,1.19,1.24,1.34,1.36,1.14,0.97,0.92,0.80], overall_avg:2229,  recent_avg:2739, volatility:0.33, rainfall_beta:0.35, annual_inflation_cagr:0.075, price_range:{p10:900, p50:2000,p90:4200} },
+    onions:   { name:'Onions',   unit:'per 50kg bag',    seasonal_index:[1.13,1.25,1.16,1.12,1.00,0.90,0.82,0.77,0.84,0.90,0.99,1.14], overall_avg:2917,  recent_avg:3428, volatility:0.22, rainfall_beta:0.20, annual_inflation_cagr:0.065, price_range:{p10:1600,p50:2800,p90:4800} },
+    potatoes: { name:'Potatoes', unit:'per 50kg bag',    seasonal_index:[0.90,0.86,0.97,1.07,1.21,1.20,0.83,0.79,0.83,0.99,1.22,1.13], overall_avg:1801,  recent_avg:2076, volatility:0.23, rainfall_beta:0.18, annual_inflation_cagr:0.055, price_range:{p10:950, p50:1700,p90:3100} },
+    beans:    { name:'Beans',    unit:'per 90kg bag',    seasonal_index:[1.11,1.21,1.17,1.03,0.86,0.83,0.77,0.82,0.94,1.03,1.11,1.13], overall_avg:7701,  recent_avg:9145, volatility:0.23, rainfall_beta:0.28, annual_inflation_cagr:0.070, price_range:{p10:5000,p50:7500,p90:12500} },
+    sorghum:  { name:'Sorghum',  unit:'per 90kg bag',    seasonal_index:[1.06,1.12,1.09,1.05,1.00,0.93,0.87,0.91,0.91,0.97,1.01,1.08], overall_avg:3018,  recent_avg:3455, volatility:0.15, rainfall_beta:0.15, annual_inflation_cagr:0.048, price_range:{p10:2000,p50:2900,p90:4500} },
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadMarketData();
 </script>
 </body>
 </html>

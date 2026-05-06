@@ -1,0 +1,378 @@
+{
+  "maize": {
+    "name": "Maize (White Grain)",
+    "unit": "per 90kg bag",
+    "seasonal_index": [
+      1.1032,
+      1.1596,
+      1.1653,
+      1.0667,
+      0.969,
+      0.8923,
+      0.829,
+      0.8529,
+      0.9248,
+      0.9514,
+      0.9979,
+      1.0879
+    ],
+    "overall_avg": 3565.0,
+    "volatility": 0.2029,
+    "rainfall_beta": 0.22,
+    "price_range": {
+      "p10": 2661.0,
+      "p50": 3494.0,
+      "p90": 4574.0
+    },
+    "annual_inflation_cagr": 0.0618,
+    "annual_avg_prices": {
+      "2016": 2701.0,
+      "2017": 3174.0,
+      "2018": 3053.0,
+      "2019": 3219.0,
+      "2020": 3476.0,
+      "2021": 3824.0,
+      "2022": 4082.0,
+      "2023": 4189.0,
+      "2024": 4364.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.08,
+      "Kisumu": 0.96,
+      "Eldoret": 0.93,
+      "Nakuru": 0.95,
+      "Garissa": 1.18
+    },
+    "recent_avg": 4212.0
+  },
+  "wheat": {
+    "name": "Wheat Flour",
+    "unit": "per 90kg bag",
+    "seasonal_index": [
+      1.0018,
+      0.9935,
+      1.0889,
+      1.0764,
+      1.0591,
+      1.0076,
+      0.9195,
+      0.898,
+      0.9186,
+      0.9864,
+      1.0182,
+      1.032
+    ],
+    "overall_avg": 3677.0,
+    "volatility": 0.189,
+    "rainfall_beta": 0.08,
+    "price_range": {
+      "p10": 2911.0,
+      "p50": 3554.0,
+      "p90": 4614.0
+    },
+    "annual_inflation_cagr": 0.0558,
+    "annual_avg_prices": {
+      "2016": 2863.0,
+      "2017": 3040.0,
+      "2018": 3171.0,
+      "2019": 3366.0,
+      "2020": 3528.0,
+      "2021": 3763.0,
+      "2022": 4661.0,
+      "2023": 4280.0,
+      "2024": 4421.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.05,
+      "Kisumu": 1.02,
+      "Eldoret": 0.97,
+      "Nakuru": 0.98,
+      "Garissa": 1.12
+    },
+    "recent_avg": 4454.0
+  },
+  "rice": {
+    "name": "Rice (Imported, Long Grain)",
+    "unit": "per 25kg bag",
+    "seasonal_index": [
+      1.0203,
+      1.0745,
+      1.0923,
+      1.0892,
+      1.0308,
+      0.9524,
+      0.8883,
+      0.8555,
+      0.9248,
+      1.0072,
+      1.0196,
+      1.0451
+    ],
+    "overall_avg": 2270.0,
+    "volatility": 0.1511,
+    "rainfall_beta": 0.05,
+    "price_range": {
+      "p10": 1857.0,
+      "p50": 2249.0,
+      "p90": 2755.0
+    },
+    "annual_inflation_cagr": 0.0503,
+    "annual_avg_prices": {
+      "2016": 1843.0,
+      "2017": 1945.0,
+      "2018": 2068.0,
+      "2019": 2113.0,
+      "2020": 2278.0,
+      "2021": 2323.0,
+      "2022": 2493.0,
+      "2023": 2634.0,
+      "2024": 2729.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 0.97,
+      "Kisumu": 1.03,
+      "Eldoret": 1.05,
+      "Nakuru": 1.04,
+      "Garissa": 1.14
+    },
+    "recent_avg": 2619.0
+  },
+  "tomatoes": {
+    "name": "Tomatoes",
+    "unit": "per crate (64kg)",
+    "seasonal_index": [
+      0.7037,
+      0.689,
+      0.7038,
+      0.9581,
+      1.1895,
+      1.2391,
+      1.3373,
+      1.3558,
+      1.1443,
+      0.9681,
+      0.9152,
+      0.7961
+    ],
+    "overall_avg": 2229.0,
+    "volatility": 0.327,
+    "rainfall_beta": 0.35,
+    "price_range": {
+      "p10": 1414.0,
+      "p50": 2135.0,
+      "p90": 3464.0
+    },
+    "annual_inflation_cagr": 0.0754,
+    "annual_avg_prices": {
+      "2016": 1639.0,
+      "2017": 1711.0,
+      "2018": 1891.0,
+      "2019": 1995.0,
+      "2020": 2174.0,
+      "2021": 2438.0,
+      "2022": 2583.0,
+      "2023": 2701.0,
+      "2024": 2932.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.1,
+      "Kisumu": 0.9,
+      "Eldoret": 0.92,
+      "Nakuru": 0.88,
+      "Garissa": 1.25
+    },
+    "recent_avg": 2739.0
+  },
+  "onions": {
+    "name": "Onions",
+    "unit": "per 50kg bag",
+    "seasonal_index": [
+      1.1247,
+      1.2521,
+      1.1555,
+      1.1214,
+      0.9995,
+      0.9011,
+      0.8154,
+      0.7696,
+      0.839,
+      0.8985,
+      0.9887,
+      1.1345
+    ],
+    "overall_avg": 2917.0,
+    "volatility": 0.224,
+    "rainfall_beta": 0.2,
+    "price_range": {
+      "p10": 2102.0,
+      "p50": 2827.0,
+      "p90": 3858.0
+    },
+    "annual_inflation_cagr": 0.0646,
+    "annual_avg_prices": {
+      "2016": 2240.0,
+      "2017": 2415.0,
+      "2018": 2541.0,
+      "2019": 2750.0,
+      "2020": 2932.0,
+      "2021": 3094.0,
+      "2022": 3331.0,
+      "2023": 3256.0,
+      "2024": 3696.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.08,
+      "Kisumu": 0.95,
+      "Eldoret": 0.93,
+      "Nakuru": 0.9,
+      "Garissa": 1.2
+    },
+    "recent_avg": 3428.0
+  },
+  "potatoes": {
+    "name": "Irish Potatoes",
+    "unit": "per 50kg bag",
+    "seasonal_index": [
+      0.8987,
+      0.8579,
+      0.9677,
+      1.0738,
+      1.2065,
+      1.2029,
+      0.8337,
+      0.7875,
+      0.8255,
+      0.9944,
+      1.2241,
+      1.1272
+    ],
+    "overall_avg": 1801.0,
+    "volatility": 0.2268,
+    "rainfall_beta": 0.18,
+    "price_range": {
+      "p10": 1314.0,
+      "p50": 1761.0,
+      "p90": 2408.0
+    },
+    "annual_inflation_cagr": 0.0551,
+    "annual_avg_prices": {
+      "2016": 1425.0,
+      "2017": 1532.0,
+      "2018": 1589.0,
+      "2019": 1633.0,
+      "2020": 1838.0,
+      "2021": 1967.0,
+      "2022": 1976.0,
+      "2023": 2064.0,
+      "2024": 2188.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.12,
+      "Kisumu": 0.98,
+      "Eldoret": 0.88,
+      "Nakuru": 0.85,
+      "Garissa": 1.28
+    },
+    "recent_avg": 2076.0
+  },
+  "beans": {
+    "name": "Dry Beans (Red)",
+    "unit": "per 90kg bag",
+    "seasonal_index": [
+      1.1138,
+      1.2084,
+      1.1646,
+      1.0289,
+      0.8637,
+      0.8291,
+      0.7686,
+      0.8157,
+      0.9422,
+      1.0285,
+      1.107,
+      1.1295
+    ],
+    "overall_avg": 7701.0,
+    "volatility": 0.2346,
+    "rainfall_beta": 0.28,
+    "price_range": {
+      "p10": 5455.0,
+      "p50": 7695.0,
+      "p90": 10550.0
+    },
+    "annual_inflation_cagr": 0.0702,
+    "annual_avg_prices": {
+      "2016": 5618.0,
+      "2017": 6616.0,
+      "2018": 6523.0,
+      "2019": 7277.0,
+      "2020": 7416.0,
+      "2021": 8423.0,
+      "2022": 8582.0,
+      "2023": 9186.0,
+      "2024": 9668.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.06,
+      "Kisumu": 0.94,
+      "Eldoret": 0.92,
+      "Nakuru": 0.95,
+      "Garissa": 1.16
+    },
+    "recent_avg": 9145.0
+  },
+  "sorghum": {
+    "name": "Sorghum",
+    "unit": "per 90kg bag",
+    "seasonal_index": [
+      1.0616,
+      1.1191,
+      1.091,
+      1.0491,
+      0.9975,
+      0.9343,
+      0.8716,
+      0.9135,
+      0.9051,
+      0.9672,
+      1.0128,
+      1.0771
+    ],
+    "overall_avg": 3018.0,
+    "volatility": 0.1507,
+    "rainfall_beta": 0.15,
+    "price_range": {
+      "p10": 2405.0,
+      "p50": 3047.0,
+      "p90": 3671.0
+    },
+    "annual_inflation_cagr": 0.0481,
+    "annual_avg_prices": {
+      "2016": 2453.0,
+      "2017": 2582.0,
+      "2018": 2695.0,
+      "2019": 2873.0,
+      "2020": 3024.0,
+      "2021": 3167.0,
+      "2022": 3338.0,
+      "2023": 3456.0,
+      "2024": 3572.0
+    },
+    "market_premiums": {
+      "Nairobi": 1.0,
+      "Mombasa": 1.06,
+      "Kisumu": 0.92,
+      "Eldoret": 0.94,
+      "Nakuru": 0.95,
+      "Garissa": 0.88
+    },
+    "recent_avg": 3455.0
+  }
+}

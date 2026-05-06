@@ -522,6 +522,129 @@ footer {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.data-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.data-loading {
+    background: rgba(148,163,184,0.08);
+    border-color: rgba(148,163,184,0.2);
+    color: var(--muted);
+}
+
+.data-ready {
+    background: rgba(134,239,172,0.08);
+    border-color: rgba(134,239,172,0.25);
+    color: #86efac;
+}
+
+.data-error {
+    background: rgba(253,164,175,0.08);
+    border-color: rgba(253,164,175,0.25);
+    color: #fda4af;
+}
+
+.hist-panel {
+    margin-top: 1.75rem;
+    padding: 1.5rem;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+}
+
+.hist-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+}
+
+.hist-chart-wrap {
+    position: relative;
+    height: 100px;
+    margin-bottom: 1.25rem;
+}
+
+.hist-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+}
+
+.hstat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.hstat-label {
+    font-size: 0.73rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+
+.hstat-val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.price-hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+}
+
+.btn-fill-avg {
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(56,189,248,0.3);
+    background: rgba(56,189,248,0.08);
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.btn-fill-avg:hover {
+    background: rgba(56,189,248,0.16);
+    border-color: rgba(56,189,248,0.55);
+}
+
+.hist-compare-bar {
+    padding: 0.85rem 1.25rem;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    border: 1px solid transparent;
+}
+
+.hcb-hot    { background: rgba(253,164,175,0.08); border-color: rgba(253,164,175,0.25); color: #fda4af; }
+.hcb-soft   { background: rgba(134,239,172,0.08); border-color: rgba(134,239,172,0.25); color: #86efac; }
+.hcb-normal { background: rgba(148,163,184,0.08); border-color: rgba(148,163,184,0.2);  color: var(--muted); }
+
+.legend-avg-line {
+    color: rgba(139,92,246,0.7);
+    font-size: 0.82rem;
+    font-style: italic;
 }
 
 .badge {
