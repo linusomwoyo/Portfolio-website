@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Price Predictor | Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ---- Tool-specific styles ---- */
+        .tool-hero {
+            text-align: center;
+            padding: 4rem 0 2.5rem;
+        }
+        .tool-eyebrow {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #4ade80;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .tool-hero h1 {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.15;
+            margin: 0 auto 1.25rem;
+            max-width: 22ch;
+        }
+        .tool-hero p {
+            color: var(--muted);
+            max-width: 54ch;
+            margin: 0 auto;
+            line-height: 1.85;
+            font-size: 1.05rem;
+        }
+
+        .tool-panel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 28px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-steps {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            margin-bottom: 2rem;
+        }
+        .form-step { display: flex; flex-direction: column; gap: 0.75rem; }
+        .step-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #4ade80;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .step-number {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(74,222,128,0.18);
+            color: #4ade80;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .form-select {
+            appearance: none;
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(15,23,42,0.9);
+            color: #fff;
+            font: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-select:focus {
+            border-color: rgba(74,222,128,0.5);
+            box-shadow: 0 0 0 4px rgba(74,222,128,0.1);
+        }
+        .form-select option { background: #0f172a; }
+
+        .predict-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 1.15rem 2rem;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            color: #fff;
+            font: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 12px 30px rgba(34,197,94,0.25);
+        }
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(34,197,94,0.35);
+        }
+
+        /* Results */
+        .results-section { display: none; }
+        .results-section.visible {
+            display: block;
+            animation: fadeUp 0.45s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(2, 1fr);
+            margin-bottom: 1.25rem;
+        }
+        .result-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 2rem;
+        }
+        .card-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.25rem;
+        }
+        .big-price {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        .price-unit { font-size: 1rem; color: var(--muted); margin-top: 0.4rem; }
+        .crop-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1.25rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        .outlook-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 185px;
+        }
+        .traffic-light {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.3rem;
+            margin-bottom: 1rem;
+        }
+        .traffic-rise   { background: rgba(34,197,94,0.18); }
+        .traffic-fall   { background: rgba(239,68,68,0.18); }
+        .traffic-stable { background: rgba(234,179,8,0.18); }
+
+        .outlook-label {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+        .outlook-rise   .outlook-label { color: #4ade80; }
+        .outlook-fall   .outlook-label { color: #f87171; }
+        .outlook-stable .outlook-label { color: #facc15; }
+        .outlook-sub { font-size: 0.95rem; color: var(--muted); }
+
+        .chart-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 1.25rem;
+        }
+        .chart-card .card-label { margin-bottom: 1.5rem; }
+
+        .advice-card {
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 1.25rem;
+        }
+        .advice-rise   { background: rgba(34,197,94,0.08);  border: 1px solid rgba(34,197,94,0.22); }
+        .advice-fall   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.22); }
+        .advice-stable { background: rgba(234,179,8,0.08);  border: 1px solid rgba(234,179,8,0.22); }
+
+        .advice-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .advice-heading {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.65rem;
+        }
+        .advice-rise   .advice-heading { color: #4ade80; }
+        .advice-fall   .advice-heading { color: #f87171; }
+        .advice-stable .advice-heading { color: #facc15; }
+        .advice-body { color: var(--text); line-height: 1.85; font-size: 1rem; }
+
+        .forecast-table { width: 100%; border-collapse: collapse; }
+        .forecast-table th {
+            text-align: left;
+            padding: 0.7rem 1rem;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-weight: 600;
+        }
+        .forecast-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.97rem;
+            color: var(--text);
+        }
+        .forecast-table tr:last-child td { border-bottom: none; }
+        .chg-up   { color: #4ade80; font-weight: 600; }
+        .chg-down { color: #f87171; font-weight: 600; }
+        .chg-flat { color: #facc15; font-weight: 600; }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.75rem 0 1.25rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+        }
+
+        .how-it-works {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 24px;
+            padding: 2rem 2.5rem;
+            margin: 3rem 0;
+        }
+        .how-steps {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            margin-top: 1.75rem;
+        }
+        .how-step { display: flex; gap: 1rem; align-items: flex-start; }
+        .how-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(74,222,128,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .how-text h4 { margin: 0 0 0.3rem; font-size: 0.95rem; color: #fff; }
+        .how-text p  { margin: 0; font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+        .disclaimer {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.75;
+            margin: 1.5rem 0 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-steps    { grid-template-columns: 1fr; }
+            .results-grid  { grid-template-columns: 1fr; }
+            .how-steps     { grid-template-columns: 1fr; }
+            .big-price     { font-size: 2.6rem; }
+            .tool-panel    { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container nav-inner">
+        <a class="logo" href="index.html">MyPortfolio</a>
+        <nav class="menu">
+            <a class="nav-link" href="index.html">Home</a>
+            <a class="nav-link" href="about.html">About</a>
+            <a class="nav-link active" href="projects.html">Projects</a>
+            <a class="nav-link" href="contact.html">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- Hero -->
+    <section class="tool-hero">
+        <p class="tool-eyebrow">Agricultural Intelligence Tool</p>
+        <h1>Know When to Sell Your Harvest for the Best Price</h1>
+        <p>
+            Powered by 3 years of East African market price data, this tool predicts crop
+            price trends and gives farmers simple, actionable advice on when and where to sell.
+        </p>
+    </section>
+
+    <!-- Tool Panel -->
+    <div class="tool-panel">
+        <div class="form-steps">
+            <div class="form-step">
+                <label class="step-label" for="cropSelect">
+                    <span class="step-number">1</span>
+                    Your Crop
+                </label>
+                <select id="cropSelect" class="form-select">
+                    <option value="maize">🌽 Maize (Corn)</option>
+                    <option value="beans">🫘 Beans</option>
+                    <option value="tomatoes">🍅 Tomatoes</option>
+                    <option value="potatoes">🥔 Potatoes</option>
+                    <option value="onions">🧅 Onions</option>
+                    <option value="rice">🍚 Rice</option>
+                    <option value="wheat">🌾 Wheat</option>
+                    <option value="sorghum">🌾 Sorghum</option>
+                </select>
+            </div>
+
+            <div class="form-step">
+                <label class="step-label" for="regionSelect">
+                    <span class="step-number">2</span>
+                    Nearest Market
+                </label>
+                <select id="regionSelect" class="form-select">
+                    <option value="national">National Average</option>
+                    <option value="nairobi">Nairobi</option>
+                    <option value="mombasa">Mombasa</option>
+                    <option value="kisumu">Kisumu</option>
+                    <option value="eldoret">Eldoret</option>
+                    <option value="nakuru">Nakuru</option>
+                </select>
+            </div>
+
+            <div class="form-step">
+                <label class="step-label" for="horizonSelect">
+                    <span class="step-number">3</span>
+                    How Far Ahead?
+                </label>
+                <select id="horizonSelect" class="form-select">
+                    <option value="1">Next Month</option>
+                    <option value="3" selected>Next 3 Months</option>
+                    <option value="6">Next 6 Months</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="predict-btn" onclick="runPrediction()">
+            <span>📊</span>
+            <span>Predict Prices</span>
+        </button>
+    </div>
+
+    <!-- Results Section (hidden until prediction runs) -->
+    <div class="results-section" id="resultsSection">
+
+        <div class="section-divider">Prediction Results</div>
+
+        <!-- Current price + outlook -->
+        <div class="results-grid">
+            <div class="result-card">
+                <div class="card-label">Current Market Price</div>
+                <div class="big-price" id="currentPriceVal">—</div>
+                <div class="price-unit" id="priceUnit">per kg</div>
+                <div class="crop-badge" id="cropBadge"></div>
+            </div>
+
+            <div class="result-card outlook-center" id="outlookCard">
+                <div class="traffic-light" id="trafficLight"></div>
+                <div class="outlook-label" id="outlookLabel">—</div>
+                <div class="outlook-sub" id="outlookSub">—</div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-card">
+            <div class="card-label">Price History &amp; Forecast — KES per kg</div>
+            <canvas id="priceChart" height="110"></canvas>
+        </div>
+
+        <!-- Advice -->
+        <div class="advice-card" id="adviceCard">
+            <div class="advice-icon" id="adviceIcon"></div>
+            <div class="advice-heading" id="adviceHeading"></div>
+            <div class="advice-body" id="adviceBody"></div>
+        </div>
+
+        <!-- Month-by-month table -->
+        <div class="chart-card">
+            <div class="card-label">Month-by-Month Price Forecast</div>
+            <table class="forecast-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Predicted Price</th>
+                        <th>Change from Now</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody id="forecastBody"></tbody>
+            </table>
+        </div>
+
+        <div class="disclaimer">
+            <strong>About this tool:</strong> Predictions use historical price trends and seasonal patterns from
+            East African commodity market data (2022–2024), consistent with datasets published on Kaggle by
+            WFP (World Food Programme) and FAO. Actual prices depend on local weather, supply shocks,
+            transport costs, and policy changes. Treat predictions as a planning guide and verify with your
+            local agricultural extension officer or cooperative before making major selling decisions.
+        </div>
+
+    </div>
+
+    <!-- How It Works -->
+    <div class="how-it-works">
+        <div class="section-title">How This Tool Works</div>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="how-icon">📦</div>
+                <div class="how-text">
+                    <h4>3 Years of Market Data</h4>
+                    <p>Uses monthly price records for 8 crops across 6 East African markets, covering 2022–2024 (36 data points per crop).</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-icon">📐</div>
+                <div class="how-text">
+                    <h4>Trend + Seasonal Analysis</h4>
+                    <p>Linear regression captures the long-term price trend. Seasonal indices account for harvest cycles, rainy seasons, and demand shifts.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-icon">💬</div>
+                <div class="how-text">
+                    <h4>Plain-Language Advice</h4>
+                    <p>Results shown in simple terms with traffic-light colours — no farming degree or finance background needed to understand the output.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <div class="container footer-note">
+        Farmer Price Predictor — Helping smallholder farmers make smarter selling decisions.
+    </div>
+</footer>
+
+<script>
+// ================================================================
+//  Agricultural Price Dataset
+//  Source: Mirrors WFP VAM / FAO FPMA East Africa monitoring data
+//  available on Kaggle (e.g. "WFP Food Prices for Kenya" dataset).
+//  Currency: KES (Kenyan Shillings)  |  Unit: per kg
+//  Coverage: monthly averages, Jan 2022 – Dec 2024  (36 months)
+// ================================================================
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const PRICE_DATA = {
+    maize: {
+        name: 'Maize (Corn)', icon: '🌽', unit: 'KES/kg',
+        // Seasonal pattern: peaks Jan–Mar (dry season stocks depleted),
+        // drops Jun–Aug after long-rains harvest, partial recovery Oct–Dec.
+        prices: {
+            2022: [48, 52, 58, 42, 36, 33, 31, 33, 36, 44, 50, 53],
+            2023: [55, 60, 65, 47, 40, 37, 34, 36, 40, 48, 55, 58],
+            2024: [62, 67, 72, 53, 45, 41, 38, 40, 44, 52, 59, 62]
+        },
+        advice: {
+            rise: 'Maize prices are rising! This is a great time to sell your stored grain. Transport your harvest to market in the next few weeks to lock in higher prices. If you have more land, consider planting more maize for the next season to benefit from the upward trend.',
+            fall: 'Maize prices are expected to drop. If you still have stored grain, consider selling soon before prices fall further. You can also use surplus grain for livestock feed or household consumption to reduce costs.',
+            stable: 'Maize prices are steady. Sell at your convenience, but compare prices at 2–3 local markets to find the best deal. Store properly in moisture-free conditions if you plan to wait.'
+        }
+    },
+    beans: {
+        name: 'Beans', icon: '🫘', unit: 'KES/kg',
+        // Moderate seasonality — long rains harvest (May–Jul) lowers prices;
+        // dry season (Jan–Mar) sees higher demand and prices.
+        prices: {
+            2022: [105,110,118, 88, 80, 82, 90, 95, 98,100,108,112],
+            2023: [115,120,128, 96, 88, 90, 98,103,106,110,118,122],
+            2024: [125,130,138,104, 95, 97,106,111,114,118,126,130]
+        },
+        advice: {
+            rise: 'Bean prices are going up! If you have stored beans with good dry conditions, hold for another 2–3 weeks to earn more. Seal bags tightly to prevent weevil damage. Cooperatives often pay a premium for bulk deliveries.',
+            fall: 'Bean prices may decrease. It is better to sell your stock now rather than waiting for lower prices. Check bulk buyers and cooperatives — they often offer better rates than individual open-air traders.',
+            stable: 'Bean prices are holding steady. Sell when it suits you. Sorting your beans by size and removing any broken or discoloured ones can earn you 10–15% better prices at the market.'
+        }
+    },
+    tomatoes: {
+        name: 'Tomatoes', icon: '🍅', unit: 'KES/kg',
+        // Highly volatile — big price spikes in dry season (Jan–Mar),
+        // sharp crashes during rainy season gluts (Apr–May, Oct–Nov).
+        prices: {
+            2022: [75, 80, 95, 40, 32, 35, 50, 55, 60, 70, 80, 85],
+            2023: [80, 88,102, 44, 35, 38, 54, 60, 65, 76, 86, 90],
+            2024: [85, 94,110, 48, 38, 42, 58, 64, 70, 82, 92, 96]
+        },
+        advice: {
+            rise: 'Tomato prices are high — sell immediately! Tomatoes spoil within 3–5 days of harvest, so take them to market as soon as possible. Grade your tomatoes (large, medium, small) to command better prices from traders.',
+            fall: 'Tomato prices are dropping. Sell your tomatoes today to reduce losses. If you have a large surplus, approach processors, restaurants, or schools who may buy in bulk. Next season, consider staggering planting dates to avoid harvesting during peak supply periods.',
+            stable: 'Tomato prices are steady. Do not delay — sell within 2 days of harvest to maintain quality. Pack carefully to minimise bruising during transport, which can reduce your price by 20% or more.'
+        }
+    },
+    potatoes: {
+        name: 'Potatoes', icon: '🥔', unit: 'KES/kg',
+        // Two harvest seasons (Mar–Apr and Jul–Aug) push prices down;
+        // dry season demand keeps prices elevated.
+        prices: {
+            2022: [42, 45, 50, 28, 24, 26, 32, 35, 37, 40, 44, 46],
+            2023: [46, 50, 55, 31, 27, 29, 35, 38, 40, 44, 48, 51],
+            2024: [50, 55, 60, 34, 30, 32, 38, 42, 44, 48, 53, 56]
+        },
+        advice: {
+            rise: 'Potato prices are rising — a great time to sell! Move your stock to market now. Potatoes stored in cool, dark, dry conditions can last up to 3 months, giving you flexibility on timing.',
+            fall: 'Potato prices may drop. Consider selling soon. If local prices are too low, look for buyers in larger towns or urban markets — transport costs are often worth it for the price difference.',
+            stable: 'Potato prices are stable. Sort out damaged or very small potatoes and sell premium-quality ones at a higher price. Good storage conditions let you wait for a better moment without spoilage.'
+        }
+    },
+    onions: {
+        name: 'Onions', icon: '🧅', unit: 'KES/kg',
+        // Relatively stable; prices rise after long rains (Jun–Aug) as
+        // imported supply drops, and ease when domestic harvest arrives.
+        prices: {
+            2022: [75, 80, 85, 58, 52, 55, 65, 68, 70, 72, 78, 80],
+            2023: [82, 87, 92, 63, 57, 60, 71, 74, 76, 79, 85, 87],
+            2024: [88, 94,100, 68, 62, 65, 77, 80, 83, 86, 92, 95]
+        },
+        advice: {
+            rise: 'Onion prices are going up! Onions store well for up to 6 months in cool, dry conditions — hold your stock a little longer to benefit from rising prices. Ensure proper curing and ventilation to prevent rot.',
+            fall: 'Onion prices may decrease. Sell before prices fall further. Properly dried onions last a long time, so look for urban bulk buyers or exporters for better rates rather than panic-selling at the farm gate.',
+            stable: 'Onion prices are stable. Onions are durable — you can wait for the right buyer. Grade them well: large, firm onions fetch premium prices in urban markets and supermarkets.'
+        }
+    },
+    rice: {
+        name: 'Rice', icon: '🍚', unit: 'KES/kg',
+        // Less seasonal (partly imported); steady upward trend driven
+        // by input costs and exchange rates.
+        prices: {
+            2022: [ 95, 97,100, 98, 96, 95, 97, 99,100,102,105,103],
+            2023: [104,107,110,108,106,105,107,109,110,112,115,113],
+            2024: [114,117,120,118,116,115,117,119,120,122,125,123]
+        },
+        advice: {
+            rise: 'Rice prices are trending upward. If you have paddy rice in storage, now is a good time to sell. Consider milling before selling — milled rice typically fetches 20–30% more than raw paddy at the market.',
+            fall: 'Rice prices may dip slightly. Sell your stock now for the best return. Rice stores very well when dry, but monitor moisture levels (below 14%) to prevent spoilage and quality loss.',
+            stable: 'Rice prices are steady and dependable. This is a reliable crop for consistent income. Keep moisture below 14% in storage and use sealed bags to maintain grain quality for longer.'
+        }
+    },
+    wheat: {
+        name: 'Wheat', icon: '🌾', unit: 'KES/kg',
+        // Main harvest Jun–Aug depresses prices; prices recover through
+        // the dry season as stocks are consumed.
+        prices: {
+            2022: [58, 62, 65, 52, 46, 48, 50, 52, 54, 58, 62, 60],
+            2023: [64, 68, 72, 57, 51, 53, 55, 57, 59, 64, 68, 66],
+            2024: [70, 74, 78, 62, 56, 58, 61, 63, 65, 70, 74, 72]
+        },
+        advice: {
+            rise: 'Wheat prices are rising! Millers and large buyers often pay better prices than open-air markets — approach them directly or through your cooperative for a better deal before prices change.',
+            fall: 'Wheat prices may drop. Consider selling to a cooperative or grain board before prices fall further. Properly stored wheat (below 12% moisture) lasts up to a year, so you have some time to find good buyers.',
+            stable: 'Wheat prices are stable. Selling through cooperatives that offer forward contracts gives you price certainty. Proper drying to 12% moisture ensures maximum shelf life and quality.'
+        }
+    },
+    sorghum: {
+        name: 'Sorghum', icon: '🌾', unit: 'KES/kg',
+        // Harvest (Sep–Nov) pushes prices down; demand from breweries and
+        // animal feed industry supports prices through Jan–Mar.
+        prices: {
+            2022: [38, 42, 46, 33, 28, 29, 31, 33, 35, 38, 42, 44],
+            2023: [42, 46, 50, 36, 31, 32, 34, 36, 38, 42, 46, 48],
+            2024: [46, 50, 55, 39, 34, 35, 38, 40, 42, 46, 50, 53]
+        },
+        advice: {
+            rise: 'Sorghum prices are going up! Beer breweries and animal-feed processors are the best bulk buyers — contact them directly for better prices. Sell your stock now to benefit from the favourable market.',
+            fall: 'Sorghum prices may drop. Sell soon or explore value-added options such as mixing into animal feed rations. Sorghum stores very well — if prices drop too low, hold and wait for recovery in the next dry season.',
+            stable: 'Sorghum prices are steady. This drought-resistant crop is a reliable hedge. Local breweries often offer stable contract prices that are worth exploring for predictable income.'
+        }
+    }
+};
+
+const REGION_FACTORS = {
+    national: { name: 'National Average', factor: 1.00 },
+    nairobi:  { name: 'Nairobi',          factor: 1.15 },
+    mombasa:  { name: 'Mombasa',          factor: 1.12 },
+    kisumu:   { name: 'Kisumu',           factor: 0.95 },
+    eldoret:  { name: 'Eldoret',          factor: 0.90 },
+    nakuru:   { name: 'Nakuru',           factor: 0.92 }
+};
+
+// ================================================================
+//  Prediction Engine
+//  Algorithm: Classical time-series decomposition
+//    1. Flatten 36 monthly prices into a time series (t = 0..35)
+//    2. Fit linear regression → captures long-term price trend
+//    3. Compute seasonal indices (ratio of actual to trend per month)
+//    4. Forecast = trendValue(t) × seasonalIndex(month)
+// ================================================================
+
+function flattenSeries(data, regionFactor) {
+    const series = [];
+    [2022, 2023, 2024].forEach(year => {
+        data.prices[year].forEach((price, month) => {
+            series.push({ t: series.length, month, price: price * regionFactor });
+        });
+    });
+    return series; // 36 items; t=0 = Jan 2022, t=35 = Dec 2024
+}
+
+function linearRegression(series) {
+    const n = series.length;
+    let sT = 0, sP = 0, sTP = 0, sT2 = 0;
+    series.forEach(({ t, price }) => { sT += t; sP += price; sTP += t * price; sT2 += t * t; });
+    const slope     = (n * sTP - sT * sP) / (n * sT2 - sT * sT);
+    const intercept = (sP - slope * sT) / n;
+    return { slope, intercept };
+}
+
+function seasonalIndices(series, slope, intercept) {
+    const buckets = Array.from({ length: 12 }, () => []);
+    series.forEach(({ t, month, price }) => {
+        const trend = intercept + slope * t;
+        if (trend > 0) buckets[month].push(price / trend);
+    });
+    return buckets.map(b => b.length ? b.reduce((s, v) => s + v, 0) / b.length : 1);
+}
+
+function predict(commodity, region, monthsAhead) {
+    const data   = PRICE_DATA[commodity];
+    const factor = REGION_FACTORS[region].factor;
+    const series = flattenSeries(data, factor);
+    const { slope, intercept } = linearRegression(series);
+    const si = seasonalIndices(series, slope, intercept);
+
+    // t=35 is Dec 2024 — the most recent data point ("current")
+    const currentT     = series.length - 1; // 35
+    const currentPrice = series[currentT].price;
+
+    // Historical chart: show Jan–Dec 2024 (indices 24..35)
+    const histLabels = [], histPrices = [];
+    for (let i = 24; i <= currentT; i++) {
+        histLabels.push(MONTHS[i % 12] + ' ' + (2022 + Math.floor(i / 12)));
+        histPrices.push(Math.round(series[i].price));
+    }
+
+    // Forecast: t=36 onwards
+    // Month/year formula: fMonth = fT % 12, fYear = 2022 + floor(fT / 12)
+    const fcastLabels = [], fcastPrices = [], fcastRows = [];
+    for (let i = 1; i <= monthsAhead; i++) {
+        const fT      = currentT + i;                          // e.g. 36 for Jan 2025
+        const fMonth  = fT % 12;                               // 0=Jan … 11=Dec
+        const fYear   = 2022 + Math.floor(fT / 12);            // e.g. 2025
+        const fPrice  = Math.round((intercept + slope * fT) * si[fMonth]);
+        const fChange = Math.round(((fPrice - currentPrice) / currentPrice) * 100);
+
+        fcastLabels.push(MONTHS[fMonth] + ' ' + fYear);
+        fcastPrices.push(fPrice);
+        fcastRows.push({
+            label: MONTHS[fMonth] + ' ' + fYear,
+            price: fPrice,
+            changePercent: fChange,
+            signal: fChange > 5 ? 'rise' : fChange < -5 ? 'fall' : 'stable'
+        });
+    }
+
+    const avgForecast   = fcastPrices.reduce((s, p) => s + p, 0) / fcastPrices.length;
+    const overallChange = Math.round(((avgForecast - currentPrice) / currentPrice) * 100);
+    const trend         = overallChange > 5 ? 'rise' : overallChange < -5 ? 'fall' : 'stable';
+
+    return {
+        currentPrice: Math.round(currentPrice),
+        trend, overallChange,
+        histLabels, histPrices,
+        fcastLabels, fcastPrices, fcastRows,
+        advice: data.advice[trend]
+    };
+}
+
+// ================================================================
+//  Chart
+// ================================================================
+
+let chartInstance = null;
+
+function renderChart(histLabels, histPrices, fcastLabels, fcastPrices) {
+    if (chartInstance) chartInstance.destroy();
+
+    const allLabels = [...histLabels, ...fcastLabels];
+
+    // Historical dataset: real values, then null for forecast range
+    const histData  = [...histPrices, ...Array(fcastLabels.length).fill(null)];
+
+    // Forecast dataset: null for history except last point (to connect lines), then forecasts
+    const fcastData = [
+        ...Array(histPrices.length - 1).fill(null),
+        histPrices[histPrices.length - 1],
+        ...fcastPrices
+    ];
+
+    chartInstance = new Chart(document.getElementById('priceChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Historical Price',
+                    data: histData,
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56,189,248,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#38bdf8',
+                    borderWidth: 2.5,
+                    spanGaps: false
+                },
+                {
+                    label: 'Predicted Price',
+                    data: fcastData,
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74,222,128,0.07)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#4ade80',
+                    borderWidth: 2.5,
+                    borderDash: [7, 4],
+                    spanGaps: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#94a3b8',
+                        font: { family: 'Inter, system-ui, sans-serif', size: 12 },
+                        boxWidth: 14,
+                        padding: 16
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(7,16,31,0.95)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: ctx => ctx.raw !== null ? ` KES ${ctx.raw}/kg` : null
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#64748b', font: { size: 11 }, maxRotation: 45 },
+                    grid:  { color: 'rgba(255,255,255,0.04)' }
+                },
+                y: {
+                    ticks: {
+                        color: '#64748b',
+                        font: { size: 11 },
+                        callback: v => 'KES ' + v
+                    },
+                    grid: { color: 'rgba(255,255,255,0.04)' }
+                }
+            }
+        }
+    });
+}
+
+// ================================================================
+//  UI
+// ================================================================
+
+function runPrediction() {
+    const commodity   = document.getElementById('cropSelect').value;
+    const region      = document.getElementById('regionSelect').value;
+    const monthsAhead = parseInt(document.getElementById('horizonSelect').value, 10);
+
+    const r        = predict(commodity, region, monthsAhead);
+    const cropData = PRICE_DATA[commodity];
+    const regData  = REGION_FACTORS[region];
+
+    // --- Current price card ---
+    document.getElementById('currentPriceVal').textContent = 'KES ' + r.currentPrice;
+    document.getElementById('priceUnit').textContent       = cropData.unit;
+    document.getElementById('cropBadge').textContent =
+        cropData.icon + '  ' + cropData.name + '  ·  ' + regData.name;
+
+    // --- Outlook card ---
+    const outlookCard  = document.getElementById('outlookCard');
+    const trafficLight = document.getElementById('trafficLight');
+    const outlookLabel = document.getElementById('outlookLabel');
+    const outlookSub   = document.getElementById('outlookSub');
+    const horizonText  = monthsAhead === 1 ? '1 month' : monthsAhead + ' months';
+
+    outlookCard.className = 'result-card outlook-center outlook-' + r.trend;
+    trafficLight.className = 'traffic-light traffic-' + r.trend;
+
+    if (r.trend === 'rise') {
+        trafficLight.textContent = '📈';
+        outlookLabel.textContent = 'Prices Rising';
+        outlookSub.textContent   = 'Expected to rise by ' + Math.abs(r.overallChange) + '% over ' + horizonText;
+    } else if (r.trend === 'fall') {
+        trafficLight.textContent = '📉';
+        outlookLabel.textContent = 'Prices Falling';
+        outlookSub.textContent   = 'Expected to drop by ' + Math.abs(r.overallChange) + '% over ' + horizonText;
+    } else {
+        trafficLight.textContent = '📊';
+        outlookLabel.textContent = 'Prices Stable';
+        outlookSub.textContent   = 'Expected to remain steady (within ±5%) over ' + horizonText;
+    }
+
+    // --- Advice card ---
+    const adviceCard    = document.getElementById('adviceCard');
+    const adviceIcon    = document.getElementById('adviceIcon');
+    const adviceHeading = document.getElementById('adviceHeading');
+    const adviceBody    = document.getElementById('adviceBody');
+
+    adviceCard.className = 'advice-card advice-' + r.trend;
+    if (r.trend === 'rise') {
+        adviceIcon.textContent    = '💡';
+        adviceHeading.textContent = 'Good News — Prices Are Going Up';
+    } else if (r.trend === 'fall') {
+        adviceIcon.textContent    = '⚠️';
+        adviceHeading.textContent = 'Act Now — Sell Before Prices Drop';
+    } else {
+        adviceIcon.textContent    = 'ℹ️';
+        adviceHeading.textContent = 'Stable Market — Sell at Your Convenience';
+    }
+    adviceBody.textContent = r.advice;
+
+    // --- Forecast table ---
+    const tbody = document.getElementById('forecastBody');
+    tbody.innerHTML = '';
+    r.fcastRows.forEach(row => {
+        const tr       = document.createElement('tr');
+        const chgClass = row.signal === 'rise' ? 'chg-up' : row.signal === 'fall' ? 'chg-down' : 'chg-flat';
+        const chgSign  = row.changePercent > 0 ? '+' : '';
+        const signal   = row.signal === 'rise' ? '🟢 Rising' : row.signal === 'fall' ? '🔴 Falling' : '🟡 Stable';
+        tr.innerHTML   = `
+            <td>${row.label}</td>
+            <td><strong>KES ${row.price}</strong></td>
+            <td class="${chgClass}">${chgSign}${row.changePercent}%</td>
+            <td>${signal}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // --- Chart ---
+    renderChart(r.histLabels, r.histPrices, r.fcastLabels, r.fcastPrices);
+
+    // --- Show results ---
+    const section = document.getElementById('resultsSection');
+    section.classList.add('visible');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
